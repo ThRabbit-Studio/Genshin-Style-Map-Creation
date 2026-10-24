@@ -1,0 +1,14 @@
+# 内部材料不入库
+_analysis/
+tools/prof/
+
+# 字体版权：原神字体（miHoYo/汉仪）不得再分发，使用方自行放置
+assets/fonts/*.ttf
+assets/fonts/*.otf
+assets/fonts/*.woff
+assets/fonts/*.woff2
+
+# 系统杂项
+Thumbs.db
+.DS_Store
+*.log

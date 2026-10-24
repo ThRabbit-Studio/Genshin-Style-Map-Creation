@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>提瓦特地图工坊 · 原神风格地图绘制</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="gmm-root">
+  <div class="gmm-top">
+    <div class="gmm-title">提瓦特 · 地图工坊<small>TEYVAT MAP ATELIER</small></div>
+    <div class="gmm-sp"></div>
+    <button type="button" class="gmm-btn" id="gmm-demo">✦ 示例地图</button>
+    <button type="button" class="gmm-btn" id="gmm-undo">↩ 撤销</button>
+    <button type="button" class="gmm-btn" id="gmm-redo">↪ 重做</button>
+    <button type="button" class="gmm-btn warn" id="gmm-clear">🗑 清空</button>
+    <button type="button" class="gmm-btn" id="gmm-savep">💾 存档</button>
+    <button type="button" class="gmm-btn" id="gmm-loadp">📂 读档</button>
+    <button type="button" class="gmm-btn" id="gmm-export">⬇ 导出 PNG</button>
+    <input type="file" id="gmm-file" accept=".json,application/json" hidden>
+  </div>
+
+  <div class="gmm-main">
+    <aside class="gmm-side">
+      <div class="gmm-tabs" role="tablist" aria-label="工具分类">
+        <button type="button" class="gmm-tab" role="tab" id="gmm-tab-t" aria-controls="gmm-panel-t" aria-selected="true">地形笔刷</button>
+        <button type="button" class="gmm-tab" role="tab" id="gmm-tab-d" aria-controls="gmm-panel-d" aria-selected="false">装饰物</button>
+        <button type="button" class="gmm-tab" role="tab" id="gmm-tab-r" aria-controls="gmm-panel-r" aria-selected="false">渲染</button>
+      </div>
+      <div id="gmm-panel-t" role="tabpanel" aria-labelledby="gmm-tab-t">
+        <div class="gmm-sec">地形</div>
+        <div class="gmm-tgrid" id="gmm-tgrid"></div>
+        <div class="gmm-slider">
+          <label>笔刷大小 <b id="gmm-bsize-v">7</b></label>
+          <input type="range" id="gmm-bsize" min="2" max="16" step="1" value="7" aria-label="笔刷大小">
+        </div>
+        <div id="gmm-genwrap"></div>
+      </div>
+      <div id="gmm-panel-d" role="tabpanel" aria-labelledby="gmm-tab-d" hidden>
+        <div id="gmm-dwrap"></div>
+        <div class="gmm-slider">
+          <label>装饰缩放 <b id="gmm-dscale-v">1.0</b></label>
+          <input type="range" id="gmm-dscale" min="0.5" max="2" step="0.05" value="1" aria-label="装饰缩放">
+        </div>
+      </div>
+      <div id="gmm-panel-r" role="tabpanel" aria-labelledby="gmm-tab-r" hidden>
+        <div class="gmm-sec">地区风格</div>
+        <div class="gmm-pals" id="gmm-pals"></div>
+        <div class="gmm-sec" style="margin-top:10px">自动分层</div>
+        <div id="gmm-rwrap"></div>
+        <div class="gmm-note">这些自动层由渲染管线按距离场生成，宽度与开关都由你决定；「手绘扭曲」改动后会重建噪声场（约半秒）。</div>
+      </div>
+      <div class="gmm-kbd"><code>Ctrl+Z</code>/<code>Ctrl+Y</code> 撤销/重做 · <code>[</code> <code>]</code> 调整笔刷 · <code>Del</code> 删除选中 · 滚轮缩放 · 空格/中键拖拽平移 · 双击文字可改名</div>
+    </aside>
+
+    <div class="gmm-stage">
+      <div class="gmm-cwrap" id="gmm-cwrap">
+        <canvas id="gmm-view" width="1600" height="900" aria-label="地图画布：用笔刷绘制地形，放置装饰物"></canvas>
+        <div id="gmm-cursor"></div>
+        <div class="gmm-viewctl" role="group" aria-label="视图控制">
+          <button type="button" id="gmm-zin" data-tooltip="放大" aria-label="放大">＋</button>
+          <button type="button" id="gmm-zout" data-tooltip="缩小" aria-label="缩小">－</button>
+          <button type="button" id="gmm-zfit" data-tooltip="适应窗口" aria-label="适应窗口">⛶</button>
+        </div>
+      </div>
+      <div class="gmm-hint" id="gmm-hint" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="gmm-toast" role="status"></div>
+  <div id="gmm-label-modal" hidden>
+    <div class="gmm-mbox gmm-mbox-sm">
+      <div class="gmm-mhead">地名标注</div>
+      <input type="text" id="gmm-label-input" class="gmm-input" maxlength="24" placeholder="输入地名，如：风起地">
+      <div class="gmm-mfoot"><button type="button" class="gmm-btn" id="gmm-label-cancel">取消</button><button type="button" class="gmm-btn" id="gmm-label-ok">确定</button></div>
+    </div>
+  </div>
+  <div id="gmm-modal" hidden>
+    <div class="gmm-mbox">
+      <div class="gmm-mhead">导出地图 <button type="button" class="gmm-btn" id="gmm-modal-close">关闭</button></div>
+      <img id="gmm-export-img" alt="导出的地图预览">
+      <div class="gmm-mfoot">在图片上右键（或长按）也可保存<a class="gmm-btn" id="gmm-dl" download="genshin-map.png">下载 PNG</a></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/noise.js"></script>
+<script src="js/terrain.js"></script>
+<script src="js/decor.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
