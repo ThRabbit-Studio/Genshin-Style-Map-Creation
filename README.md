@@ -8,6 +8,12 @@
   `assets/fonts/genshin.ttf` 即可启用（或运行 `python tools/copy_font.py`）；
   缺失时自动回退系统字体，功能不受影响。
 
+## 许可证
+
+代码以 [MIT License](LICENSE) 开源。本项目为非官方同人工具，与米哈游 / HoYoverse
+无隶属或背书关系；"原神"及相关商标归其各自所有者。项目不分发任何游戏资源
+（含原神字体文件）。
+
 ## 运行
 
 纯静态站点，无构建步骤。
